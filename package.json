@@ -2,8 +2,24 @@
   "name": "@feasbl/sdk",
   "version": "0.0.0",
   "type": "module",
-  "private": true,
   "description": "JavaScript builders and client utilities for Feasbl optimization models.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Feasbl/feasbl-js.git"
+  },
+  "homepage": "https://github.com/Feasbl/feasbl-js#readme",
+  "bugs": {
+    "url": "https://github.com/Feasbl/feasbl-js/issues"
+  },
+  "files": [
+    "src/",
+    "examples/",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": "./src/index.js"
   },
