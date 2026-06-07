@@ -1,6 +1,6 @@
 {
   "name": "@feasbl/sdk",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "JavaScript builders and client utilities for Feasbl optimization models.",
   "license": "Apache-2.0",
