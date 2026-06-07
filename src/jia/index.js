@@ -3,8 +3,8 @@
 import { JiaBuilder } from "./builder.js";
 
 /**
- * Create a linear-programming Jia builder.
- * @param {string} name
+ * Create a builder for a linear-programming `.jia` model.
+ * @param {string} name Model identifier used in the generated source and filename.
  * @returns {JiaBuilder}
  */
 export function lp(name) {
@@ -12,8 +12,8 @@ export function lp(name) {
 }
 
 /**
- * Create a constraint-programming Jia builder.
- * @param {string} name
+ * Create a builder for a constraint-programming `.jia` model.
+ * @param {string} name Model identifier used in the generated source and filename.
  * @returns {JiaBuilder}
  */
 export function cp(name) {
@@ -21,4 +21,3 @@ export function cp(name) {
 }
 
 export { JiaBuilder };
-

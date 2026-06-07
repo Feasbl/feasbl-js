@@ -24,7 +24,7 @@
  */
 
 export class PddlType {
-  /** @param {string} name */
+  /** Create a PDDL type reference. @param {string} name Type name. */
   constructor(name) {
     /** @type {string} */
     this.name = assertName(name, "type name");
@@ -32,7 +32,7 @@ export class PddlType {
 }
 
 export class PddlParam {
-  /** @param {string} name @param {PddlType} type */
+  /** Create an action parameter. @param {string} name Parameter name without `?`. @param {PddlType} type Parameter type. */
   constructor(name, type) {
     /** @type {string} */
     this.name = assertName(name, "parameter name");
@@ -42,7 +42,7 @@ export class PddlParam {
 }
 
 export class PddlObject {
-  /** @param {string} name @param {PddlType} type */
+  /** Create a problem object. @param {string} name Object name. @param {PddlType} type Object type. */
   constructor(name, type) {
     /** @type {string} */
     this.name = assertName(name, "object name");
@@ -52,7 +52,7 @@ export class PddlObject {
 }
 
 export class PddlPredicate {
-  /** @param {string} name @param {PddlType[]} types */
+  /** Create a predicate schema. @param {string} name Predicate name. @param {PddlType[]} types Argument types. */
   constructor(name, types) {
     /** @type {string} */
     this.name = assertName(name, "predicate name");
@@ -60,7 +60,7 @@ export class PddlPredicate {
     this.types = types;
   }
 
-  /** @param {PddlValue[]} args @returns {PddlExpr} */
+  /** Instantiate this predicate with concrete terms. @param {PddlValue[]} args Predicate arguments. @returns {PddlExpr} */
   call(args) {
     assertArity(this.name, this.types, args);
     return new PddlExpr("predicate", { name: this.name, args });
@@ -68,7 +68,7 @@ export class PddlPredicate {
 }
 
 export class PddlFunction {
-  /** @param {string} name @param {PddlType[]} types */
+  /** Create a numeric fluent schema. @param {string} name Fluent name. @param {PddlType[]} types Argument types. */
   constructor(name, types) {
     /** @type {string} */
     this.name = assertName(name, "numeric fluent name");
@@ -76,7 +76,7 @@ export class PddlFunction {
     this.types = types;
   }
 
-  /** @param {PddlValue[]} args @returns {PddlExpr} */
+  /** Instantiate this numeric fluent with concrete terms. @param {PddlValue[]} args Fluent arguments. @returns {PddlExpr} */
   call(args) {
     assertArity(this.name, this.types, args);
     return new PddlExpr("function", { name: this.name, args });
@@ -84,7 +84,7 @@ export class PddlFunction {
 }
 
 export class PddlExpr {
-  /** @param {PddlExprNode["kind"]} kind @param {Omit<PddlExprNode, "kind">} props */
+  /** Create a typed PDDL expression node. @param {PddlExprNode["kind"]} kind Expression kind. @param {Omit<PddlExprNode, "kind">} props Expression fields for the kind. */
   constructor(kind, props) {
     /** @type {PddlExprNode["kind"]} */
     this.kind = kind;
@@ -113,25 +113,26 @@ export class PddlExpr {
 }
 
 export class ActionScope {
+  /** Create the parameter declaration scope passed to action builder callbacks. */
   constructor() {
     /** @type {PddlParam[]} */
     this.params = [];
   }
 
-  /** @param {string} name @param {PddlType} type @returns {PddlParam} */
+  /** Declare an action parameter. @param {string} name Parameter name without `?`. @param {PddlType} type Parameter type. @returns {PddlParam} */
   param(name, type) {
     const param = new PddlParam(name, type);
     this.params.push(param);
     return param;
   }
 
-  /** @returns {PddlExpr} */
+  /** Reference the `?duration` variable for a durative action. @returns {PddlExpr} */
   duration() {
     return new PddlExpr("duration", {});
   }
 }
 
-/** @param {string} value @param {string} label @returns {string} */
+/** Validate and return a PDDL-compatible name. @param {string} value Candidate name. @param {string} label Human-readable label for errors. @returns {string} */
 export function assertName(value, label) {
   if (!/^[A-Za-z_][A-Za-z0-9_-]*$/.test(value)) {
     throw new Error(`Invalid ${label}: ${value}`);
@@ -139,14 +140,14 @@ export function assertName(value, label) {
   return value;
 }
 
-/** @param {string} name @param {unknown[]} types @param {unknown[]} args @returns {void} */
+/** Assert a callable received the expected number of arguments. @param {string} name Callable name. @param {unknown[]} types Declared argument types. @param {unknown[]} args Supplied arguments. @returns {void} */
 export function assertArity(name, types, args) {
   if (args.length !== types.length) {
     throw new Error(`${name} expects ${types.length} argument(s), got ${args.length}`);
   }
 }
 
-/** @param {PddlParam[]} params @returns {void} */
+/** Assert an action parameter list has no duplicate names. @param {PddlParam[]} params Parameters to inspect. @returns {void} */
 export function assertUniqueParams(params) {
   const names = new Set();
   for (const param of params) {

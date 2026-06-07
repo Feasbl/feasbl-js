@@ -10,7 +10,10 @@
  */
 
 export class FeasblClient {
-  /** @param {ClientOptions} [options] */
+  /**
+   * Create a Feasbl API client for direct model submission.
+   * @param {ClientOptions} [options] Client configuration; `apiKey` defaults to `FEASBL_API_KEY`.
+   */
   constructor(options = {}) {
     /** @type {string | undefined} */
     this.apiKey = options.apiKey ?? readApiKey();
@@ -22,9 +25,9 @@ export class FeasblClient {
   }
 
   /**
-   * Submit a generated Jia/PDDL model directly to the API.
-   * @param {FileBackedModel} model
-   * @param {SubmitOptions} options
+   * Submit a generated Jia or PDDL model directly to the Feasbl jobs API.
+   * @param {FileBackedModel} model Object exposing `toFiles()`.
+   * @param {SubmitOptions} options Compute tier and runtime limits for the job.
    * @returns {Promise<SubmitResult>}
    */
   async submit(model, options) {
@@ -79,8 +82,8 @@ function explainFailure(responseText) {
 }
 
 /**
- * Convert generated SDK files into API inline inputs.
- * @param {FileMap} files
+ * Convert generated SDK files into inline job inputs accepted by the API.
+ * @param {FileMap} files Map from generated file path to file contents.
  * @returns {InlineInput[]}
  */
 export function filesToInputs(files) {
@@ -92,8 +95,8 @@ export function filesToInputs(files) {
 }
 
 /**
- * Infer Feasbl artifact kind from a generated filename.
- * @param {string} filePath
+ * Infer the Feasbl artifact kind from a generated filename.
+ * @param {string} filePath Generated file path, such as `model.jia` or `domain.pddl`.
  * @returns {"domain" | "problem" | "model"}
  */
 export function inferKind(filePath) {

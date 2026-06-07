@@ -5,9 +5,9 @@ export { planning } from "./pddl/index.js";
 export { FeasblClient, filesToInputs, inferKind } from "./client.js";
 
 /**
- * Submit a generated model to Feasbl.
- * @param {import("./client.js").FileBackedModel} model
- * @param {import("./client.js").SubmitOptions & import("./client.js").ClientOptions} options
+ * Submit a generated model to Feasbl using a one-shot client.
+ * @param {import("./client.js").FileBackedModel} model Object exposing `toFiles()`.
+ * @param {import("./client.js").SubmitOptions & import("./client.js").ClientOptions} options Client and job options.
  * @returns {Promise<import("./client.js").SubmitResult>}
  */
 export async function solve(model, options) {

@@ -14,8 +14,6 @@
 npm install git+ssh://git@github.com/Feasbl/feasbl-js.git
 ```
 
-Once the package is published to npm, install it as `@feasbl/sdk`.
-
 ## Use
 
 ```js

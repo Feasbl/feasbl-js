@@ -10,7 +10,7 @@ import { PddlExpr, PddlObject, PddlParam } from "./ast.js";
 /** @typedef {import("./ast.js").PddlType} PddlType */
 /** @typedef {"at start" | "over all" | "at end"} TemporalLabel */
 
-/** @param {PlanningBuilder} plan @returns {string} */
+/** Render a PDDL domain file. @param {PlanningBuilder} plan Planning builder to render. @returns {string} Domain PDDL source. */
 export function renderDomainPddl(plan) {
   const lines = [`(define (domain ${plan.name})`, `  (:requirements ${renderRequirements(plan)})`];
   if (plan.types.length > 0) lines.push(`  (:types ${plan.types.map(t => t.name).join(" ")})`);
@@ -32,7 +32,7 @@ export function renderDomainPddl(plan) {
   return `${lines.join("\n")}\n`;
 }
 
-/** @param {PlanningBuilder} plan @returns {string} */
+/** Render a PDDL problem file. @param {PlanningBuilder} plan Planning builder to render. @returns {string} Problem PDDL source. */
 export function renderProblemPddl(plan) {
   const lines = [`(define (problem ${plan.name}_problem)`, `  (:domain ${plan.name})`];
   if (plan.objects.length > 0) {
@@ -50,7 +50,7 @@ export function renderProblemPddl(plan) {
   return `${lines.join("\n")}\n`;
 }
 
-/** @param {PddlActionNode} action @returns {string[]} */
+/** Render an instantaneous or durative action block. @param {PddlActionNode} action Action node to render. @returns {string[]} Lines of PDDL source. */
 export function renderAction(action) {
   if (action.kind === "action") {
     return [
@@ -76,7 +76,7 @@ export function renderAction(action) {
   ];
 }
 
-/** @param {TemporalBlock} block @param {"condition" | "effect"} kind @returns {PddlExpr} */
+/** Convert temporal condition/effect fields into a PDDL expression tree. @param {TemporalBlock} block Temporal fields. @param {"condition" | "effect"} kind Whether the block is a condition or effect. @returns {PddlExpr} */
 export function renderTemporalBlock(block, kind) {
   /** @type {PddlExpr[]} */
   const items = [];
@@ -88,7 +88,7 @@ export function renderTemporalBlock(block, kind) {
   return new PddlExpr("and", { items });
 }
 
-/** @param {PddlExpr[]} items @param {TemporalLabel} label @param {PddlExpr} expr @returns {void} */
+/** Add a temporal wrapper, flattening conjunctions into separate temporal items. @param {PddlExpr[]} items Destination items. @param {TemporalLabel} label Temporal label. @param {PddlExpr} expr Expression to wrap. @returns {void} */
 export function addTemporal(items, label, expr) {
   if (expr instanceof PddlExpr && expr.kind === "and") {
     for (const item of requireItems(expr)) items.push(new PddlExpr("temporal", { label, expr: item }));
@@ -97,7 +97,7 @@ export function addTemporal(items, label, expr) {
   items.push(new PddlExpr("temporal", { label, expr }));
 }
 
-/** @param {PddlValue} expr @returns {string} */
+/** Render a PDDL expression or term inline. @param {PddlValue} expr Expression or term to render. @returns {string} PDDL expression text. */
 export function renderExpr(expr) {
   if (expr instanceof PddlParam || expr instanceof PddlObject) return renderTerm(expr);
   if (typeof expr === "number") return formatNumber(expr);
@@ -114,7 +114,7 @@ export function renderExpr(expr) {
   throw new Error(`Unknown PDDL expression kind ${expr.kind}`);
 }
 
-/** @param {PddlValue} expr @param {number} indent @returns {string[]} */
+/** Render a PDDL expression across indented lines. @param {PddlValue} expr Expression or term to render. @param {number} indent Space indentation. @returns {string[]} PDDL source lines. */
 export function renderExprLines(expr, indent) {
   const pad = " ".repeat(indent);
   if (!(expr instanceof PddlExpr)) return [`${pad}${renderExpr(expr)}`];
@@ -126,7 +126,7 @@ export function renderExprLines(expr, indent) {
   return [`${pad}${renderExpr(expr)}`];
 }
 
-/** @param {PddlValue} expr @returns {string} */
+/** Render an initial-state expression, using init assignment syntax when needed. @param {PddlValue} expr Initial fact or assignment. @returns {string} PDDL init expression. */
 export function renderInitExpr(expr) {
   if (expr instanceof PddlExpr && expr.kind === "numericEffect" && expr.op === "assign") {
     return `(= ${renderExpr(requireTarget(expr))} ${renderExpr(requireValue(expr))})`;
@@ -134,17 +134,17 @@ export function renderInitExpr(expr) {
   return renderExpr(expr);
 }
 
-/** @param {PddlParam[]} params @returns {string} */
+/** Render typed action parameters. @param {PddlParam[]} params Parameters to render. @returns {string} Parameter list text. */
 export function renderParams(params) {
   return params.map(param => `?${param.name} - ${param.type.name}`).join(" ");
 }
 
-/** @param {PddlType[]} types @returns {string} */
+/** Render generated typed arguments for predicate/function declarations. @param {PddlType[]} types Argument types. @returns {string} Typed-list suffix. */
 export function renderTypedList(types) {
   return types.length ? ` ${types.map((type, index) => `?x${index + 1} - ${type.name}`).join(" ")}` : "";
 }
 
-/** @param {PlanningBuilder} plan @returns {string} */
+/** Infer and render required PDDL requirement flags. @param {PlanningBuilder} plan Planning builder to inspect. @returns {string} Requirements list. */
 export function renderRequirements(plan) {
   const requirements = new Set([":strips", ":typing"]);
   if (plan.actions.some(action => action.kind === "durative")) requirements.add(":durative-actions");
@@ -154,7 +154,7 @@ export function renderRequirements(plan) {
   return Array.from(requirements).join(" ");
 }
 
-/** @param {PlanningBuilder} plan @param {PddlExprKind} kind @returns {boolean} */
+/** Check whether the plan contains a condition expression kind. @param {PlanningBuilder} plan Planning builder to inspect. @param {PddlExprKind} kind Expression kind to find. @returns {boolean} */
 export function hasConditionKind(plan, kind) {
   /** @type {(PddlExpr | null | undefined)[]} */
   const conditionRoots = [plan.goalExpr];
@@ -176,7 +176,7 @@ export function hasConditionKind(plan, kind) {
   return conditionRoots.some(visit);
 }
 
-/** @param {PddlParam | PddlObject | PddlExpr} term @returns {string} */
+/** Render a PDDL term. @param {PddlParam | PddlObject | PddlExpr} term Term node to render. @returns {string} PDDL term text. */
 export function renderTerm(term) {
   if (term instanceof PddlParam) return `?${term.name}`;
   if (term instanceof PddlObject) return term.name;

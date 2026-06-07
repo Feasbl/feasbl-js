@@ -36,8 +36,9 @@
 
 export class JiaVar {
   /**
-   * @param {JiaVariableKind} kind
-   * @param {string} name
+   * Create a Jia variable reference.
+   * @param {JiaVariableKind} kind Variable type.
+   * @param {string} name Variable identifier.
    */
   constructor(kind, name) {
     /** @type {JiaVariableKind} */
@@ -49,9 +50,10 @@ export class JiaVar {
 
 export class JiaSet {
   /**
-   * @param {"Set[Interval]" | "Set[Integer]"} kind
-   * @param {string} name
-   * @param {JiaVar[]} members
+   * Create a Jia set reference.
+   * @param {"Set[Interval]" | "Set[Integer]"} kind Set type.
+   * @param {string} name Set identifier.
+   * @param {JiaVar[]} members Variables contained in the set.
    */
   constructor(kind, name, members) {
     /** @type {"Set[Interval]" | "Set[Integer]"} */
@@ -65,8 +67,9 @@ export class JiaSet {
 
 export class JiaExpr {
   /**
-   * @param {JiaExprNode["kind"]} kind
-   * @param {Omit<JiaExprNode, "kind">} props
+   * Create a typed Jia expression node.
+   * @param {JiaExprNode["kind"]} kind Expression kind.
+   * @param {Omit<JiaExprNode, "kind">} props Expression fields for the kind.
    */
   constructor(kind, props) {
     /** @type {JiaExprNode["kind"]} */
@@ -89,8 +92,9 @@ export class JiaExpr {
 
 export class JiaConstraint {
   /**
-   * @param {(JiaConstraintNode | JiaNamedConstraint)["kind"]} kind
-   * @param {Omit<JiaConstraintNode | JiaNamedConstraint, "kind">} props
+   * Create a typed Jia constraint node.
+   * @param {(JiaConstraintNode | JiaNamedConstraint)["kind"]} kind Constraint kind.
+   * @param {Omit<JiaConstraintNode | JiaNamedConstraint, "kind">} props Constraint fields for the kind.
    */
   constructor(kind, props) {
     /** @type {(JiaConstraintNode | JiaNamedConstraint)["kind"]} */
@@ -118,8 +122,9 @@ export class JiaConstraint {
 }
 
 /**
- * @param {string} value
- * @param {string} label
+ * Validate and return a Jia-compatible identifier.
+ * @param {string} value Candidate identifier.
+ * @param {string} label Human-readable label for errors.
  * @returns {string}
  */
 export function assertIdentifier(value, label) {

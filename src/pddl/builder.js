@@ -11,7 +11,7 @@ import { renderDomainPddl, renderProblemPddl } from "./render.js";
 /** @typedef {import("./ast.js").DurativeActionBody} DurativeActionBody */
 
 export class PlanningBuilder {
-  /** @param {string} name */
+  /** Create a PDDL planning builder. @param {string} name Domain and problem base name. */
   constructor(name) {
     /** @type {string} */
     this.name = assertName(name, "planning name");
@@ -31,7 +31,7 @@ export class PlanningBuilder {
     this.goalExpr = null;
   }
 
-  /** @param {string} name @returns {PddlType} */
+  /** Declare a PDDL object type. @param {string} name Type name. @returns {PddlType} */
   type(name) {
     const type = new PddlType(name);
     this.types.push(type);
@@ -40,8 +40,8 @@ export class PlanningBuilder {
 
   /**
    * Declare a PDDL predicate and return a callable expression builder.
-   * @param {string} name
-   * @param {PddlType[]} types
+   * @param {string} name Predicate name.
+   * @param {PddlType[]} types Argument types, in order.
    * @returns {PddlCallable}
    */
   predicate(name, types) {
@@ -58,8 +58,8 @@ export class PlanningBuilder {
 
   /**
    * Declare a numeric fluent and return a callable numeric expression builder.
-   * @param {string} name
-   * @param {PddlType[]} types
+   * @param {string} name Numeric fluent name.
+   * @param {PddlType[]} types Argument types, in order.
    * @returns {PddlCallable}
    */
   numeric(name, types) {
@@ -74,7 +74,7 @@ export class PlanningBuilder {
     return callable;
   }
 
-  /** @param {string} name @param {(scope: ActionScope) => ActionBody} build @returns {void} */
+  /** Add an instantaneous PDDL action. @param {string} name Action name. @param {(scope: ActionScope) => ActionBody} build Callback that declares parameters and returns preconditions/effects. @returns {void} */
   action(name, build) {
     const scope = new ActionScope();
     const body = build(scope);
@@ -82,7 +82,7 @@ export class PlanningBuilder {
     this.actions.push({ kind: "action", name: assertName(name, "action name"), params: scope.params, body });
   }
 
-  /** @param {string} name @param {(scope: ActionScope) => DurativeActionBody} build @returns {void} */
+  /** Add a durative PDDL action. @param {string} name Action name. @param {(scope: ActionScope) => DurativeActionBody} build Callback that declares parameters and returns duration, conditions, and effects. @returns {void} */
   durativeAction(name, build) {
     const scope = new ActionScope();
     const body = build(scope);
@@ -90,62 +90,62 @@ export class PlanningBuilder {
     this.actions.push({ kind: "durative", name: assertName(name, "durative action name"), params: scope.params, body });
   }
 
-  /** @param {string} name @param {PddlType} type @returns {PddlObject} */
+  /** Declare a problem object. @param {string} name Object name. @param {PddlType} type Object type. @returns {PddlObject} */
   object(name, type) {
     const object = new PddlObject(name, type);
     this.objects.push(object);
     return object;
   }
 
-  /** @param {...PddlExpr} facts @returns {void} */
+  /** Add facts or numeric assignments to the problem initial state. @param {...PddlExpr} facts Initial facts/effects. @returns {void} */
   initially(...facts) {
     this.init.push(...facts);
   }
 
-  /** @param {PddlExpr} expr @returns {void} */
+  /** Set the problem goal condition. @param {PddlExpr} expr Goal expression. @returns {void} */
   goal(expr) {
     this.goalExpr = expr;
   }
 
-  /** @param {...PddlExpr} items @returns {PddlExpr} */
+  /** Build a conjunction, flattening nested conjunctions. @param {...PddlExpr} items Child expressions. @returns {PddlExpr} */
   and(...items) { return new PddlExpr("and", { items: flatten("and", items) }); }
-  /** @param {...PddlExpr} items @returns {PddlExpr} */
+  /** Build a disjunction, flattening nested disjunctions. @param {...PddlExpr} items Child expressions. @returns {PddlExpr} */
   or(...items) { return new PddlExpr("or", { items: flatten("or", items) }); }
-  /** @param {PddlExpr} expr @returns {PddlExpr} */
+  /** Build a negated condition. @param {PddlExpr} expr Expression to negate. @returns {PddlExpr} */
   not(expr) { return new PddlExpr("not", { expr }); }
-  /** @param {PddlValue} left @param {PddlValue} right @returns {PddlExpr} */
+  /** Build an equality comparison. @param {PddlValue} left Left value. @param {PddlValue} right Right value. @returns {PddlExpr} */
   eq(left, right) { return new PddlExpr("comparison", { op: "=", left: asPddlValue(left), right: asPddlValue(right) }); }
-  /** @param {PddlValue} left @param {PddlValue} right @returns {PddlExpr} */
+  /** Build a `>=` numeric comparison. @param {PddlValue} left Left value. @param {PddlValue} right Right value. @returns {PddlExpr} */
   ge(left, right) { return new PddlExpr("comparison", { op: ">=", left: asPddlValue(left), right: asPddlValue(right) }); }
-  /** @param {PddlValue} left @param {PddlValue} right @returns {PddlExpr} */
+  /** Build a `<=` numeric comparison. @param {PddlValue} left Left value. @param {PddlValue} right Right value. @returns {PddlExpr} */
   le(left, right) { return new PddlExpr("comparison", { op: "<=", left: asPddlValue(left), right: asPddlValue(right) }); }
-  /** @param {PddlValue} left @param {PddlValue} right @returns {PddlExpr} */
+  /** Build a `>` numeric comparison. @param {PddlValue} left Left value. @param {PddlValue} right Right value. @returns {PddlExpr} */
   gt(left, right) { return new PddlExpr("comparison", { op: ">", left: asPddlValue(left), right: asPddlValue(right) }); }
-  /** @param {PddlValue} left @param {PddlValue} right @returns {PddlExpr} */
+  /** Build a `<` numeric comparison. @param {PddlValue} left Left value. @param {PddlValue} right Right value. @returns {PddlExpr} */
   lt(left, right) { return new PddlExpr("comparison", { op: "<", left: asPddlValue(left), right: asPddlValue(right) }); }
-  /** @param {PddlExpr} target @param {PddlValue} value @returns {PddlExpr} */
+  /** Build a numeric assignment effect. @param {PddlExpr} target Numeric fluent expression. @param {PddlValue} value Assigned value. @returns {PddlExpr} */
   assign(target, value) { return new PddlExpr("numericEffect", { op: "assign", target, value: asPddlValue(value) }); }
-  /** @param {PddlExpr} target @param {PddlValue} value @returns {PddlExpr} */
+  /** Build a numeric increase effect. @param {PddlExpr} target Numeric fluent expression. @param {PddlValue} value Increment value. @returns {PddlExpr} */
   increase(target, value) { return new PddlExpr("numericEffect", { op: "increase", target, value: asPddlValue(value) }); }
-  /** @param {PddlExpr} target @param {PddlValue} value @returns {PddlExpr} */
+  /** Build a numeric decrease effect. @param {PddlExpr} target Numeric fluent expression. @param {PddlValue} value Decrement value. @returns {PddlExpr} */
   decrease(target, value) { return new PddlExpr("numericEffect", { op: "decrease", target, value: asPddlValue(value) }); }
-  /** @returns {PddlExpr} */
+  /** Reference the `?duration` variable inside a durative action. @returns {PddlExpr} */
   duration() { return new PddlExpr("duration", {}); }
 
-  /** @returns {FileMap} */
+  /** Render domain and problem PDDL files. @returns {FileMap} File map containing `domain.pddl` and `problem.pddl`. */
   toFiles() {
     return { "domain.pddl": this.toDomainPddl(), "problem.pddl": this.toProblemPddl() };
   }
 
-  /** @returns {string} */
+  /** Render domain and problem PDDL concatenated into one string. @returns {string} PDDL source text. */
   toPddl() {
     const files = this.toFiles();
     return `${files["domain.pddl"]}\n${files["problem.pddl"]}`;
   }
 
-  /** @returns {string} */
+  /** Render only the PDDL domain file. @returns {string} Domain PDDL source. */
   toDomainPddl() { return renderDomainPddl(this); }
-  /** @returns {string} */
+  /** Render only the PDDL problem file. @returns {string} Problem PDDL source. */
   toProblemPddl() { return renderProblemPddl(this); }
 }
 
