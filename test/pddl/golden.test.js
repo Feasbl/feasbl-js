@@ -3,7 +3,7 @@
 import test from "node:test";
 
 import * as feasbl from "../../src/index.js";
-import { assertGolden } from "../helpers.js";
+import { assertGolden, assertPddlParses } from "../helpers.js";
 
 test("PDDL durative planning model renders stable domain and problem files", async () => {
   const plan = feasbl.planning("courier");
@@ -56,4 +56,5 @@ test("PDDL durative planning model renders stable domain and problem files", asy
   const files = plan.toFiles();
   await assertGolden("planning-durative-domain.pddl", files["domain.pddl"]);
   await assertGolden("planning-durative-problem.pddl", files["problem.pddl"]);
+  await assertPddlParses(files);
 });

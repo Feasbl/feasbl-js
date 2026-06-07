@@ -3,7 +3,7 @@
 import test from "node:test";
 
 import * as feasbl from "../../src/index.js";
-import { assertGolden } from "../helpers.js";
+import { assertGolden, assertJiaParses } from "../helpers.js";
 
 test("LP production model renders stable Jia", async () => {
   const lp = feasbl.lp("production");
@@ -17,6 +17,7 @@ test("LP production model renders stable Jia", async () => {
 
   const jia = lp.toFiles()["production.jia"];
   await assertGolden("lp-production.jia", jia);
+  await assertJiaParses(jia);
 });
 
 test("CP schedule model renders stable Jia", async () => {
@@ -41,4 +42,5 @@ test("CP schedule model renders stable Jia", async () => {
 
   const jia = cp.toFiles()["schedule.jia"];
   await assertGolden("cp-schedule.jia", jia);
+  await assertJiaParses(jia);
 });

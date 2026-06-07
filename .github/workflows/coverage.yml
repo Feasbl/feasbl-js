@@ -28,6 +28,12 @@ jobs:
           node-version: 22
           cache: npm
 
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install jia-parse
+        run: cargo install jia-parse --version 1.0.0 --locked
+
       - name: Install dependencies
         run: npm ci
 
