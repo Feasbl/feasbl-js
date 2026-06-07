@@ -1,0 +1,18 @@
+@model lp
+model production
+
+variables {
+  Real: chairs, tables
+}
+
+domains {
+  chairs in 0..inf
+  tables in 0..inf
+}
+
+constraints {
+  2 * chairs + 4 * tables <= 120
+  3 * chairs + 2 * tables <= 90
+}
+
+maximize 45 * chairs + 80 * tables

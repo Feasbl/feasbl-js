@@ -1,0 +1,79 @@
+name: Coverage
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  COVERAGE_PREFIX: coverage/feasbl-js
+
+jobs:
+  coverage:
+    name: Generate and upload coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run coverage
+        run: npm run coverage
+
+      - name: Prepare coverage upload
+        run: |
+          mkdir -p coverage-upload
+          cp -R coverage/* coverage-upload/
+          node <<'JS'
+          const { readFileSync, writeFileSync } = require("node:fs");
+          const summary = JSON.parse(readFileSync("coverage/coverage-summary.json", "utf8"));
+          const lines = summary.total.lines;
+          const percent = Number(lines.pct.toFixed(2));
+          const color =
+            percent >= 90 ? "brightgreen" :
+            percent >= 80 ? "green" :
+            percent >= 70 ? "yellowgreen" :
+            percent >= 60 ? "yellow" :
+            "red";
+
+          writeFileSync("coverage-upload/coverage-summary.json", JSON.stringify({
+            lines: {
+              covered: lines.covered,
+              total: lines.total,
+              percent,
+            },
+          }, null, 2) + "\n");
+
+          writeFileSync("coverage-upload/coverage-badge.json", JSON.stringify({
+            schemaVersion: 1,
+            label: "coverage",
+            message: `${percent.toFixed(2)}%`,
+            color,
+          }, null, 2) + "\n");
+          JS
+
+      - name: Upload coverage to S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ENDPOINT_URL_S3: ${{ secrets.AWS_ENDPOINT_URL_S3 }}
+          BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+        run: |
+          aws s3 sync coverage-upload "s3://${BUCKET_NAME}/${COVERAGE_PREFIX}/" \
+            --endpoint-url "${AWS_ENDPOINT_URL_S3}" \
+            --delete

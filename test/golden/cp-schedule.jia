@@ -1,0 +1,29 @@
+@model cp
+model schedule
+
+variables {
+  Interval: job1Op1, job1Op2, job2Op1, job2Op2
+  Integer: makespan
+  Set[Interval]: machine1, machine2
+}
+
+domains {
+  duration(job1Op1) = 3
+  duration(job1Op2) = 2
+  duration(job2Op1) = 4
+  duration(job2Op2) = 1
+  makespan in 0..100
+  machine1 = {job1Op1, job2Op2}
+  machine2 = {job1Op2, job2Op1}
+}
+
+constraints {
+  end_of(job1Op1) <= start_of(job1Op2)
+  end_of(job2Op1) <= start_of(job2Op2)
+  no_overlap(machine1)
+  no_overlap(machine2)
+  end_of(job1Op2) <= makespan
+  end_of(job2Op2) <= makespan
+}
+
+minimize makespan
