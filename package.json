@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Feasbl/feasbl-js.git"
+    "url": "git+https://github.com/Feasbl/feasbl-js.git"
   },
   "homepage": "https://github.com/Feasbl/feasbl-js#readme",
   "bugs": {
